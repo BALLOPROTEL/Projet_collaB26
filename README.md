@@ -33,6 +33,7 @@ Le livrable final comprend :
 | #2 Seydou / Lead Dev — qualité et DevSecOps | ✅ Terminé |
 | #3 Yvan / Architecte — architecture macroscopique | ✅ Terminé |
 | #4 Nouhaila / DevOps — CI/CD, tests, orchestrateur | 🟡 En cours |
+| #10 Équipe — prototype Collector.shop V1 | ✅ Terminé |
 | #5 Oumou / Sécurité — politique de sécurité | ⏳ À faire |
 | #6 Équipe — PPT, démos et soutenance | ⏳ À faire |
 
@@ -95,6 +96,8 @@ Les tâches suivantes transforment maintenant la documentation en prototype rée
 - **#12 — Jenkins** : seconde démonstration CI/CD sur le même scénario.
 - **#13 — Tests** : unitaires, intégration, API, autorisations, smoke et performance ciblée.
 - **#14 — Kubernetes/Kind** : conteneurisation et déploiement local orchestré.
+
+Guide commun de test pour toute l'équipe : `docs/05-prototype/TESTS-EQUIPE.md`.
 
 ## Choix DevOps préparatoires
 
