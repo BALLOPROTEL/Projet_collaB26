@@ -1,0 +1,17 @@
+{
+  "name": "collector-shop-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:api": "npm --workspace @collector/api run dev",
+    "dev:web": "npm --workspace @collector/web run dev",
+    "test": "npm --workspaces --if-present run test",
+    "build": "npm --workspaces --if-present run build"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
