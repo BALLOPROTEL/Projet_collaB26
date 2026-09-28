@@ -1,0 +1,38 @@
+name: Collector CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  repository-check:
+    name: Repository structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate project deliverables
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f README.md
+          test -f docs/01-product-owner/cadrage-collector-shop.md
+          test -f docs/02-lead-dev/qualite-logicielle.md
+          test -f docs/03-architecture/architecture-macroscopique.md
+          test -f docs/04-devops/pipeline-cible.md
+          echo "Repository structure OK"
+
+      - name: Detect future application
+        shell: bash
+        run: |
+          if [ -f package.json ] || [ -f pom.xml ] || [ -f build.gradle ] || [ -f requirements.txt ] || [ -f pyproject.toml ]; then
+            echo "Application detected: replace the placeholder with install, lint, tests, security scans and build."
+          else
+            echo "No application code yet: documentation pipeline only."
+          fi
