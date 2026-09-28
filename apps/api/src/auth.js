@@ -3,7 +3,7 @@ import { hasRole } from "./roles.js";
 
 const issuer =
   process.env.KEYCLOAK_ISSUER ??
-  "http://localhost:8081/realms/collector";
+  "http://localhost:8082/realms/collector";
 
 const jwks = createRemoteJWKSet(
   new URL(`${issuer}/protocol/openid-connect/certs`)
