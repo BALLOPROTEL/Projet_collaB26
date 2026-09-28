@@ -1,0 +1,42 @@
+name: Collector CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  repository-check:
+    name: Repository structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate project deliverables
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f README.md
+          test -f docs/01-product-owner/cadrage-collector-shop.md
+          test -f docs/02-lead-dev/qualite-logicielle.md
+          test -f docs/03-architecture/architecture-macroscopique.md
+          test -f docs/04-devops/pipeline-cible.md
+          echo "Repository structure OK"
+
+  application-ci:
+    name: Application CI placeholder
+    if: ${{ hashFiles('package.json', 'pom.xml', 'build.gradle', 'requirements.txt', 'pyproject.toml') != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prototype pipeline notice
+        run: |
+          echo "Application detected."
+          echo "This job will be replaced by the real install, lint, test, security and build steps during prototype implementation."
