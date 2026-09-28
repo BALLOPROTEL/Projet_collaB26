@@ -25,6 +25,17 @@ Le livrable final comprend :
 | Oumou | Sécurité | `feat/oumou-security` |
 | Roger | Product Owner | `feat/roger-product-owner` |
 
+## État d'avancement
+
+| Étape | Statut |
+|---|---|
+| #1 Roger / Product Owner — cadrage fonctionnel | ✅ Terminé |
+| #2 Seydou / Lead Dev — qualité et DevSecOps | ✅ Terminé |
+| #3 Yvan / Architecte — architecture macroscopique | ✅ Terminé |
+| #4 Nouhaila / DevOps — CI/CD, tests, orchestrateur | 🟡 En cours |
+| #5 Oumou / Sécurité — politique de sécurité | ⏳ À faire |
+| #6 Équipe — PPT, démos et soutenance | ⏳ À faire |
+
 ## Répartition principale
 
 ### Seydou — Lead Dev
@@ -60,7 +71,7 @@ Le livrable final comprend :
 - préparer les critères d’acceptation et la cohérence fonctionnelle des démonstrations ;
 - contribuer au PPT et au retour d’expérience.
 
-## Backlog du projet
+## Backlog global
 
 1. Organisation du groupe et cadrage Collector.shop.
 2. Exigences fonctionnelles et non fonctionnelles.
@@ -74,6 +85,27 @@ Le livrable final comprend :
 10. Politique de sécurité, scans, supervision, risques et incidents.
 11. Finalisation des démonstrations.
 12. PPT, répétition de la soutenance et retour d’expérience.
+
+## Plan d'implémentation ajouté après l'architecture
+
+Les tâches suivantes transforment maintenant la documentation en prototype réellement testable :
+
+- **#10 — Prototype Collector.shop V1** : frontend, backend/API, catalogue, authentification, rôles, annonce minimale, données et endpoint de santé.
+- **#11 — GitHub Actions** : pipeline réel du prototype.
+- **#12 — Jenkins** : seconde démonstration CI/CD sur le même scénario.
+- **#13 — Tests** : unitaires, intégration, API, autorisations, smoke et performance ciblée.
+- **#14 — Kubernetes/Kind** : conteneurisation et déploiement local orchestré.
+
+## Choix DevOps préparatoires
+
+- CI/CD principal : **GitHub Actions**
+- CI/CD comparatif : **Jenkins**
+- Orchestrateur : **Kubernetes**
+- Environnement local proposé pour la démonstration : **Kind**
+
+Le pipeline cible suit la chaîne :
+
+**Commit / PR → qualité → tests unitaires → tests d’intégration → scans sécurité → build → packaging → déploiement test → smoke tests**
 
 ## Fonctions minimales à prendre en compte
 
