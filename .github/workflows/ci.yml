@@ -77,7 +77,7 @@ jobs:
         run: |
           set -euo pipefail
           for i in {1..60}; do
-            if curl -fsS http://localhost:8081/realms/collector/.well-known/openid-configuration >/dev/null; then
+            if curl -fsS http://localhost:8082/realms/collector/.well-known/openid-configuration >/dev/null; then
               echo "Keycloak ready"
               exit 0
             fi
@@ -126,7 +126,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          USER_TOKEN=$(curl -fsS -X POST             http://localhost:8081/realms/collector/protocol/openid-connect/token             -H "Content-Type: application/x-www-form-urlencoded"             -d "client_id=collector-web"             -d "grant_type=password"             -d "username=user1"             -d "password=User123!" | jq -r '.access_token')
+          USER_TOKEN=$(curl -fsS -X POST             http://localhost:8082/realms/collector/protocol/openid-connect/token             -H "Content-Type: application/x-www-form-urlencoded"             -d "client_id=collector-web"             -d "grant_type=password"             -d "username=user1"             -d "password=User123!" | jq -r '.access_token')
 
           test -n "$USER_TOKEN"
           curl -fsS -H "Authorization: Bearer $USER_TOKEN"             http://localhost:3000/api/me | jq -e '.roles | index("USER") != null'
@@ -138,7 +138,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ADMIN_TOKEN=$(curl -fsS -X POST             http://localhost:8081/realms/collector/protocol/openid-connect/token             -H "Content-Type: application/x-www-form-urlencoded"             -d "client_id=collector-web"             -d "grant_type=password"             -d "username=admin1"             -d "password=Admin123!" | jq -r '.access_token')
+          ADMIN_TOKEN=$(curl -fsS -X POST             http://localhost:8082/realms/collector/protocol/openid-connect/token             -H "Content-Type: application/x-www-form-urlencoded"             -d "client_id=collector-web"             -d "grant_type=password"             -d "username=admin1"             -d "password=Admin123!" | jq -r '.access_token')
 
           test -n "$ADMIN_TOKEN"
           curl -fsS -H "Authorization: Bearer $ADMIN_TOKEN"             http://localhost:3000/api/admin/stats | jq -e '.message == "Admin access granted"'
