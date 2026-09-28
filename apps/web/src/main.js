@@ -4,7 +4,7 @@ import "./style.css";
 const API_URL = "http://localhost:3000/api";
 
 const keycloak = new Keycloak({
-  url: "http://localhost:8081",
+  url: "http://localhost:8082",
   realm: "collector",
   clientId: "collector-web"
 });

@@ -51,7 +51,7 @@ Au premier démarrage, patienter jusqu'à ce que Keycloak soit disponible.
 Vérification :
 
 ```bash
-curl -fsS http://localhost:8081/realms/collector/.well-known/openid-configuration > /dev/null && echo "Keycloak OK"
+curl -fsS http://localhost:8082/realms/collector/.well-known/openid-configuration > /dev/null && echo "Keycloak OK"
 ```
 
 ## 4. Démarrer le backend
@@ -113,7 +113,7 @@ Ce compte peut aussi tester l'espace administration.
 
 ## Console Keycloak
 
-- URL : http://localhost:8081/admin/
+- URL : http://localhost:8082/admin/
 - administrateur local : `admin`
 - mot de passe local : `Admin123!`
 
@@ -172,8 +172,8 @@ docker compose down -v
 |---|---|
 | Frontend | http://localhost:5173 |
 | Backend API | http://localhost:3000 |
-| Keycloak | http://localhost:8081 |
-| PostgreSQL | localhost:5432 |
+| Keycloak | http://localhost:8082 |
+| PostgreSQL | localhost:5434 |
 
 ## Note sécurité
 
