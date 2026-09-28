@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: collector
       POSTGRES_PASSWORD: collector_dev
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5434:5432"
     volumes:
       - collector_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -24,7 +24,7 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: Admin123!
     ports:
-      - "8081:8080"
+      - "127.0.0.1:8082:8080"
     volumes:
       - ./infra/keycloak/collector-realm.json:/opt/keycloak/data/import/collector-realm.json:ro
 
