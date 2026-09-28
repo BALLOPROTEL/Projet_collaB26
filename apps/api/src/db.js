@@ -4,7 +4,7 @@ const { Pool } = pg;
 
 const connectionString =
   process.env.DATABASE_URL ??
-  "postgresql://collector:collector_dev@localhost:5432/collector";
+  "postgresql://collector:collector_dev@localhost:5434/collector";
 
 export const pool = new Pool({ connectionString });
 
