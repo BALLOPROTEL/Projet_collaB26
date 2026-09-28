@@ -261,27 +261,31 @@ elements.adminCheck.addEventListener("click", async () => {
   }
 });
 
-await loadCatalog();
+async function boot() {
+  await loadCatalog();
 
-try {
-  state.authenticated = await keycloak.init({
-    onLoad: "check-sso",
-    pkceMethod: "S256",
-    checkLoginIframe: false
-  });
-  state.authReady = true;
+  try {
+    state.authenticated = await keycloak.init({
+      onLoad: "check-sso",
+      pkceMethod: "S256",
+      checkLoginIframe: false
+    });
+    state.authReady = true;
 
-  if (state.authenticated) {
-    state.username =
-      keycloak.tokenParsed?.preferred_username ??
-      keycloak.tokenParsed?.sub ??
-      "Utilisateur";
-    state.roles = keycloak.tokenParsed?.realm_access?.roles ?? [];
-    await loadMe();
+    if (state.authenticated) {
+      state.username =
+        keycloak.tokenParsed?.preferred_username ??
+        keycloak.tokenParsed?.sub ??
+        "Utilisateur";
+      state.roles = keycloak.tokenParsed?.realm_access?.roles ?? [];
+      await loadMe();
+    }
+  } catch (error) {
+    console.error("Keycloak initialization failed:", error);
+    state.authReady = false;
   }
-} catch (error) {
-  console.error("Keycloak initialization failed:", error);
-  state.authReady = false;
+
+  renderSession();
 }
 
-renderSession();
+boot();
