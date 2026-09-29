@@ -81,7 +81,7 @@ Accès principaux :
 - Keycloak : http://localhost:8082
 - RabbitMQ management : http://localhost:15674
 
-Guide de recette microservices : `docs/05-prototype/TESTS-MICROSERVICES.md`.
+Guide unique de démarrage, de recette et de validation pour toute l'équipe : `docs/05-prototype/TESTS-EQUIPE.md`.
 
 ## CI/CD et orchestration
 
