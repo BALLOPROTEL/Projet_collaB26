@@ -8,7 +8,7 @@ La stack complète peut maintenant être lancée avec une seule commande :
 git checkout main
 git pull --ff-only
 npm install
-docker compose down
+docker compose down --remove-orphans -v
 docker compose up -d --build
 docker compose ps
 ```
@@ -107,11 +107,11 @@ La Pull Request de migration exécute aussi un smoke test distribué complet dan
 ## Nettoyage
 
 ```bash
-docker compose down
+docker compose down --remove-orphans
 ```
 
 Pour supprimer également les données :
 
 ```bash
-docker compose down -v
+docker compose down --remove-orphans -v
 ```
