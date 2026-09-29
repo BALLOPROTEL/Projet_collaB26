@@ -1,13 +1,17 @@
 {
-  "name": "collector-shop-prototype",
-  "version": "0.1.0",
+  "name": "collector-shop-microservices",
+  "version": "0.2.0",
   "private": true,
   "workspaces": [
-    "apps/*"
+    "apps/web",
+    "services/*"
   ],
   "scripts": {
-    "dev:api": "npm --workspace @collector/api run dev",
     "dev:web": "npm --workspace @collector/web run dev",
+    "dev:gateway": "npm --workspace @collector/api-gateway run dev",
+    "dev:catalog": "npm --workspace @collector/catalog-service run dev",
+    "dev:listing": "npm --workspace @collector/listing-service run dev",
+    "dev:notification": "npm --workspace @collector/notification-service run dev",
     "test": "npm --workspaces --if-present run test",
     "build": "npm --workspaces --if-present run build"
   },

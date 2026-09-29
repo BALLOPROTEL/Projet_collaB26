@@ -34,7 +34,7 @@ app.innerHTML = `
 
     <main>
       <section class="hero">
-        <div class="eyebrow">Prototype V1 · projet collaboratif CESI</div>
+        <div class="eyebrow">Prototype microservices · projet collaboratif CESI</div>
         <h1>Des objets rares. Des échanges maîtrisés.</h1>
         <p>
           Cette version de démonstration valide le catalogue public, l'authentification,
@@ -243,8 +243,21 @@ elements.listingForm.addEventListener("submit", async (event) => {
       })
     });
 
+    const createdTitle = String(data.get("title"));
     elements.listingForm.reset();
-    elements.listingMessage.textContent = "Annonce créée avec succès.";
+    elements.listingMessage.textContent =
+      "Annonce créée. Propagation de l'événement vers le catalogue…";
+
+    for (let attempt = 1; attempt <= 10; attempt += 1) {
+      const items = await apiFetch("/catalog");
+      if (items.some((item) => item.title === createdTitle)) {
+        elements.listingMessage.textContent =
+          "Annonce créée et projetée dans le catalogue via RabbitMQ.";
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 400));
+    }
+
     await loadCatalog();
   } catch (error) {
     elements.listingMessage.textContent = `Erreur : ${error.message}`;

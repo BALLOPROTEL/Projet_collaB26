@@ -1,0 +1,19 @@
+{
+  "name": "@collector/listing-service",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test",
+    "build": "node -e \"console.log('Listing Service JavaScript: no compilation required')\""
+  },
+  "dependencies": {
+    "amqplib": "^0.10.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jose": "^5.10.0",
+    "pg": "^8.13.1"
+  }
+}

@@ -1,20 +1,52 @@
 services:
-  postgres:
+  catalog-db:
     image: postgres:16-alpine
-    container_name: collector-postgres
+    container_name: collector-catalog-db
     environment:
-      POSTGRES_DB: collector
-      POSTGRES_USER: collector
-      POSTGRES_PASSWORD: collector_dev
+      POSTGRES_DB: collector_catalog
+      POSTGRES_USER: collector_catalog
+      POSTGRES_PASSWORD: catalog_dev
     ports:
       - "127.0.0.1:5434:5432"
     volumes:
-      - collector_pgdata:/var/lib/postgresql/data
+      - collector_catalog_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U collector -d collector"]
+      test: ["CMD-SHELL", "pg_isready -U collector_catalog -d collector_catalog"]
       interval: 5s
       timeout: 3s
-      retries: 15
+      retries: 20
+
+  listing-db:
+    image: postgres:16-alpine
+    container_name: collector-listing-db
+    environment:
+      POSTGRES_DB: collector_listing
+      POSTGRES_USER: collector_listing
+      POSTGRES_PASSWORD: listing_dev
+    ports:
+      - "127.0.0.1:5435:5432"
+    volumes:
+      - collector_listing_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U collector_listing -d collector_listing"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    container_name: collector-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: collector
+      RABBITMQ_DEFAULT_PASS: collector_rabbit
+    ports:
+      - "127.0.0.1:5674:5672"
+      - "127.0.0.1:15674:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.7.4
@@ -28,5 +60,107 @@ services:
     volumes:
       - ./infra/keycloak/collector-realm.json:/opt/keycloak/data/import/collector-realm.json:ro
 
+  catalog-service:
+    build:
+      context: .
+      dockerfile: services/catalog-service/Dockerfile
+    container_name: collector-catalog-service
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://collector_catalog:catalog_dev@catalog-db:5432/collector_catalog
+      RABBITMQ_URL: amqp://collector:collector_rabbit@rabbitmq:5672
+    ports:
+      - "127.0.0.1:3001:3001"
+    depends_on:
+      catalog-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3001/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  listing-service:
+    build:
+      context: .
+      dockerfile: services/listing-service/Dockerfile
+    container_name: collector-listing-service
+    environment:
+      PORT: 3002
+      DATABASE_URL: postgresql://collector_listing:listing_dev@listing-db:5432/collector_listing
+      RABBITMQ_URL: amqp://collector:collector_rabbit@rabbitmq:5672
+      KEYCLOAK_ISSUER: http://localhost:8082/realms/collector
+      KEYCLOAK_JWKS_URL: http://keycloak:8080/realms/collector/protocol/openid-connect/certs
+    ports:
+      - "127.0.0.1:3002:3002"
+    depends_on:
+      listing-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3002/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: services/notification-service/Dockerfile
+    container_name: collector-notification-service
+    environment:
+      PORT: 3003
+      RABBITMQ_URL: amqp://collector:collector_rabbit@rabbitmq:5672
+    ports:
+      - "127.0.0.1:3003:3003"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3003/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+    container_name: collector-api-gateway
+    environment:
+      PORT: 3000
+      CATALOG_SERVICE_URL: http://catalog-service:3001
+      LISTING_SERVICE_URL: http://listing-service:3002
+      CORS_ORIGIN: http://localhost:5173
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      catalog-service:
+        condition: service_healthy
+      listing-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: collector-web
+    ports:
+      - "127.0.0.1:5173:80"
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+
 volumes:
-  collector_pgdata:
+  collector_catalog_pgdata:
+  collector_listing_pgdata:

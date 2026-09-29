@@ -2,146 +2,111 @@
 
 ## Objectif
 
-Transformer les consignes CESI en un projet concret autour de **Collector.shop**, une application web de vente d’objets de collection entre particuliers.
+Collector.shop est le prototype technique d'une marketplace C2C d'objets de collection. Le projet sert de support aux livrables CESI : architecture, DevSecOps, CI/CD, tests, sécurité, orchestration et démonstrations.
 
-Le livrable final comprend :
-- un support PPT avec les schémas demandés ;
-- une démarche de développement DevSecOps ;
-- une architecture macroscopique de l’application ;
-- une comparaison et une démonstration de **2 solutions CI/CD** ;
-- une comparaison et une démonstration de **2 technologies applicatives** ;
-- une architecture d’environnement managé / orchestrateur ;
-- une stratégie de tests intégrée au CI/CD ;
-- une politique de sécurité ;
-- une présentation de 20 min suivie de 15 min de questions, avec une part importante consacrée aux démonstrations.
+## Architecture actuelle
 
-## Équipe et branches
+Le prototype a d'abord été validé sous forme de backend monolithique V1. Il est désormais en **migration vers une vraie architecture microservices** :
 
-| Membre | Rôle | Branche |
-|---|---|---|
-| Seydou | Lead Dev | `feat/seydou-lead-dev` |
-| Nouhaila | DevOps | `feat/nouhaila-devops` |
-| Yvan | Architecte | `feat/yvan-architecture` |
-| Oumou | Sécurité | `feat/oumou-security` |
-| Roger | Product Owner | `feat/roger-product-owner` |
+- Frontend Web ;
+- API Gateway ;
+- Catalog Service + base dédiée ;
+- Listing Service + base dédiée ;
+- Notification Service ;
+- RabbitMQ pour les événements ;
+- Keycloak pour l'identité et les rôles.
+
+Le schéma technique détaillé est dans `docs/03-architecture/architecture-technique-microservices.md`.
+
+## Équipe
+
+| Membre | Rôle |
+|---|---|
+| Seydou | Lead Dev |
+| Nouhaila | DevOps |
+| Yvan | Architecte |
+| Oumou | Sécurité |
+| Roger | Product Owner |
 
 ## État d'avancement
 
 | Étape | Statut |
 |---|---|
-| #1 Roger / Product Owner — cadrage fonctionnel | ✅ Terminé |
-| #2 Seydou / Lead Dev — qualité et DevSecOps | ✅ Terminé |
-| #3 Yvan / Architecte — architecture macroscopique | ✅ Terminé |
-| #4 Nouhaila / DevOps — CI/CD, tests, orchestrateur | 🟡 En cours |
-| #10 Équipe — prototype Collector.shop V1 | ✅ Terminé |
-| #5 Oumou / Sécurité — politique de sécurité | ⏳ À faire |
-| #6 Équipe — PPT, démos et soutenance | ⏳ À faire |
+| #1 Product Owner — cadrage fonctionnel | ✅ Terminé |
+| #2 Lead Dev — qualité / DevSecOps | ✅ Terminé |
+| #3 Architecture macroscopique | ✅ Terminé |
+| #10 Prototype monolithique V1 | ✅ Terminé |
+| #19 Migration microservices | 🟡 En cours |
+| #11 GitHub Actions | 🟡 En cours |
+| #12 Jenkins | ⏳ À faire |
+| #13 Tests | 🟡 En cours |
+| #14 Kubernetes / Kind | ⏳ À faire |
+| #5 Sécurité | ⏳ À faire |
+| #6 PPT / démos / soutenance | ⏳ À faire |
 
-## Répartition principale
+## Architecture microservices
 
-### Seydou — Lead Dev
-- coordonner les choix techniques ;
-- formaliser le cycle de développement DevSecOps avec Nouhaila ;
-- définir les standards de qualité logicielle ;
-- piloter l’intégration des contributions ;
-- participer aux démonstrations et à la synthèse finale.
+```text
+Frontend
+   |
+API Gateway
+   |----------------------|
+Catalog Service       Listing Service
+   |                      |
+Catalog DB            Listing DB
+                          |
+                       RabbitMQ
+                      /        \
+          Catalog Service     Notification Service
 
-### Nouhaila — DevOps
-- comparer 2 solutions CI/CD ;
-- réaliser les démonstrations CI/CD ;
-- définir le pipeline : build, tests, scans, déploiement ;
-- préparer l’architecture de l’environnement managé / orchestrateur ;
-- contribuer au monitoring et à l’observabilité.
+Keycloak -> authentification / rôles
+```
 
-### Yvan — Architecte
-- produire le schéma macroscopique de Collector.shop sans imposer de technologies dans le premier schéma ;
-- identifier les composants et leurs interactions ;
-- vérifier les exigences de performance, fiabilité, maintenabilité, évolutivité et intégration ;
-- cadrer la comparaison des 2 technologies applicatives.
+Le principe **database per service** est appliqué : Catalog et Listing ne partagent ni tables ni accès directs aux bases.
 
-### Oumou — Sécurité
-- définir la politique de sécurité ;
-- intégrer la sécurité au cycle DevSecOps ;
-- prévoir scans, supervision, gestion des risques et gestion des incidents ;
-- traiter les contraintes liées aux comptes, paiements, données personnelles, fraude et modération.
+## Démarrage rapide
 
-### Roger — Product Owner
-- formaliser les besoins fonctionnels et les priorités ;
-- maintenir le périmètre V1 ;
-- définir les profils et parcours : visiteur, acheteur, vendeur, administrateur ;
-- préparer les critères d’acceptation et la cohérence fonctionnelle des démonstrations ;
-- contribuer au PPT et au retour d’expérience.
+```bash
+git checkout main
+git pull --ff-only
+npm install
+docker compose up -d --build
+docker compose ps
+```
 
-## Backlog global
+Accès principaux :
+- frontend : http://localhost:5173
+- API Gateway : http://localhost:3000
+- Keycloak : http://localhost:8082
+- RabbitMQ management : http://localhost:15674
 
-1. Organisation du groupe et cadrage Collector.shop.
-2. Exigences fonctionnelles et non fonctionnelles.
-3. Attributs de qualité logicielle et justification.
-4. Cycle DevSecOps et interactions entre les métiers.
-5. Architecture macroscopique de Collector.shop.
-6. Comparaison + démonstration de 2 solutions CI/CD.
-7. Comparaison + démonstration de 2 technologies applicatives.
-8. Architecture de l’environnement managé / orchestrateur.
-9. Stratégie de tests et intégration dans le pipeline.
-10. Politique de sécurité, scans, supervision, risques et incidents.
-11. Finalisation des démonstrations.
-12. PPT, répétition de la soutenance et retour d’expérience.
+Guide de recette microservices : `docs/05-prototype/TESTS-MICROSERVICES.md`.
 
-## Plan d'implémentation ajouté après l'architecture
+## CI/CD et orchestration
 
-Les tâches suivantes transforment maintenant la documentation en prototype réellement testable :
+Choix :
+- GitHub Actions ;
+- Jenkins ;
+- Kubernetes ;
+- Kind pour la démonstration locale.
 
-- **#10 — Prototype Collector.shop V1** : frontend, backend/API, catalogue, authentification, rôles, annonce minimale, données et endpoint de santé.
-- **#11 — GitHub Actions** : pipeline réel du prototype.
-- **#12 — Jenkins** : seconde démonstration CI/CD sur le même scénario.
-- **#13 — Tests** : unitaires, intégration, API, autorisations, smoke et performance ciblée.
-- **#14 — Kubernetes/Kind** : conteneurisation et déploiement local orchestré.
+Pipeline cible :
 
-Guide commun de test pour toute l'équipe : `docs/05-prototype/TESTS-EQUIPE.md`.
-
-## Choix DevOps préparatoires
-
-- CI/CD principal : **GitHub Actions**
-- CI/CD comparatif : **Jenkins**
-- Orchestrateur : **Kubernetes**
-- Environnement local proposé pour la démonstration : **Kind**
-
-Le pipeline cible suit la chaîne :
-
-**Commit / PR → qualité → tests unitaires → tests d’intégration → scans sécurité → build → packaging → déploiement test → smoke tests**
-
-## Fonctions minimales à prendre en compte
-
-Collector.shop doit notamment couvrir :
-- catalogue public ;
-- inscription et authentification pour acheter/vendre ;
-- profils acheteur et vendeur ;
-- boutiques virtuelles et publication d’articles ;
-- photos, descriptions, prix et frais de port ;
-- contrôle/modération des annonces ;
-- chat acheteur-vendeur avec limitation du partage de coordonnées personnelles ;
-- paiement par carte via la plateforme ;
-- notifications et suivi des changements de prix ;
-- recommandations selon les centres d’intérêt ;
-- administration/back-office ;
-- préparation à l’intégration d’un système de détection de fraude ;
-- internationalisation et accessibilité ;
-- capacité d’évolution rapide.
+**Commit / PR → qualité → tests → scans sécurité → build → images → déploiement → smoke tests**
 
 ## Règles Git
 
-- `main` reste la branche d’intégration.
-- Chaque membre travaille sur sa branche dédiée.
-- Les changements significatifs passent par une Pull Request vers `main`.
-- Chaque PR doit expliquer le besoin traité, les choix effectués et les éléments à démontrer.
-- Éviter les gros commits mélangés : une modification logique = un commit clair.
+- `main` reste la branche d'intégration.
+- Chaque modification significative passe par une branche et une Pull Request.
+- Une PR doit expliquer le besoin, les choix et les éléments testables.
+- Les tests automatisés doivent être verts avant fusion.
 
 ## Définition de terminé
 
-Une tâche est considérée comme terminée si :
-- le livrable est présent dans le dépôt ;
+Une tâche est terminée lorsque :
+- le livrable est présent ;
 - le choix est justifié ;
-- le schéma ou la documentation est compréhensible ;
-- la démonstration associée fonctionne si elle est requise ;
-- les impacts sécurité et qualité ont été vérifiés ;
-- la contribution est prête à être présentée à l’oral.
+- les tests associés passent ;
+- la démonstration fonctionne si elle est requise ;
+- les impacts sécurité / qualité sont identifiés ;
+- la contribution est présentable à l'oral.
