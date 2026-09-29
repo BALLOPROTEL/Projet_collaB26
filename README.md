@@ -70,6 +70,7 @@ Le principe **database per service** est appliqué : Catalog et Listing ne parta
 git checkout main
 git pull --ff-only
 npm install
+docker compose down --remove-orphans -v
 docker compose up -d --build
 docker compose ps
 ```
