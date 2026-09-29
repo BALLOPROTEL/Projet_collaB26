@@ -1,0 +1,17 @@
+{
+  "name": "@collector/notification-service",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test",
+    "build": "node -e \"console.log('Notification Service JavaScript: no compilation required')\""
+  },
+  "dependencies": {
+    "amqplib": "^0.10.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  }
+}
