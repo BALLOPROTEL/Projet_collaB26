@@ -6,7 +6,7 @@ Collector.shop est le prototype technique d'une marketplace C2C d'objets de coll
 
 ## Architecture actuelle
 
-Le prototype a d'abord été validé sous forme de backend monolithique V1. Il est désormais en **migration vers une vraie architecture microservices** :
+Le prototype a d'abord été validé sous forme de backend monolithique V1. Il fonctionne désormais avec une **architecture microservices réelle et validée** :
 
 - Frontend Web ;
 - API Gateway ;
@@ -36,11 +36,11 @@ Le schéma technique détaillé est dans `docs/03-architecture/architecture-tech
 | #2 Lead Dev — qualité / DevSecOps | ✅ Terminé |
 | #3 Architecture macroscopique | ✅ Terminé |
 | #10 Prototype monolithique V1 | ✅ Terminé |
-| #19 Migration microservices | 🟡 En cours |
+| #19 Migration microservices | ✅ Terminé |
 | #11 GitHub Actions | 🟡 En cours |
 | #12 Jenkins | ⏳ À faire |
 | #13 Tests | 🟡 En cours |
-| #14 Kubernetes / Kind | ⏳ À faire |
+| #14 Kubernetes / Kind | 🟡 Conteneurisation terminée, Kind à faire |
 | #5 Sécurité | ⏳ À faire |
 | #6 PPT / démos / soutenance | ⏳ À faire |
 
