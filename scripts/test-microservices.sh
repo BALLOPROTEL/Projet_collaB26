@@ -126,10 +126,15 @@ curl -fsS "$API_URL/api/listings"   | TITLE="$TITLE" node -e '
 echo "PASS: annonce présente dans la source de vérité Listing"
 
 echo "=== 7/10 - Vérification RabbitMQ ==="
-wait_for "RabbitMQ Management" "$RABBITMQ_MANAGEMENT_URL/api/overview" 30
+docker exec collector-rabbitmq rabbitmq-diagnostics -q ping >/dev/null \
+  || fail "RabbitMQ ne répond pas au ping"
 
-curl -fsS -u "collector:collector_rabbit"   "$RABBITMQ_MANAGEMENT_URL/api/queues/%2F"   | json_assert 'Array.isArray(value) && value.some(q => q.name === "catalog.listing-created") && value.some(q => q.name === "notification.listing-created")'
-echo "PASS: queues RabbitMQ Catalog et Notification présentes"
+QUEUES="$(docker exec collector-rabbitmq rabbitmqctl list_queues name)"
+printf '%s\n' "$QUEUES" | grep -q "catalog.listing-created" \
+  || fail "queue catalog.listing-created absente"
+printf '%s\n' "$QUEUES" | grep -q "notification.listing-created" \
+  || fail "queue notification.listing-created absente"
+echo "PASS: RabbitMQ actif et queues Catalog / Notification présentes"
 
 echo "=== 8/10 - Projection asynchrone dans Catalog Service ==="
 CATALOG_OK=0
