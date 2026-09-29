@@ -36,12 +36,16 @@ services:
   rabbitmq:
     image: rabbitmq:4-management-alpine
     container_name: collector-rabbitmq
+    hostname: collector-rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: collector
       RABBITMQ_DEFAULT_PASS: collector_rabbit
+      RABBITMQ_ERLANG_COOKIE: collector_demo_cookie_2026_change_me
     ports:
       - "127.0.0.1:5674:5672"
       - "127.0.0.1:15674:15672"
+    volumes:
+      - collector_rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 5s
@@ -164,3 +168,4 @@ services:
 volumes:
   collector_catalog_pgdata:
   collector_listing_pgdata:
+  collector_rabbitmq_data:
