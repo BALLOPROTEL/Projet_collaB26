@@ -115,3 +115,17 @@ Pour supprimer également les données :
 ```bash
 docker compose down --remove-orphans -v
 ```
+
+
+## Dépannage RabbitMQ
+
+Le conteneur RabbitMQ utilise un volume nommé `collector_rabbitmq_data` et un cookie Erlang de démonstration afin d'éviter les erreurs de permission sur `/var/lib/rabbitmq/.erlang.cookie`.
+
+Si RabbitMQ a déjà été lancé avec un volume cassé, repartir proprement :
+
+```bash
+docker compose down --remove-orphans -v
+docker compose up -d --build
+```
+
+Le cookie présent dans `compose.yaml` est uniquement destiné à l'environnement pédagogique local. En production, il doit être fourni via un secret.
