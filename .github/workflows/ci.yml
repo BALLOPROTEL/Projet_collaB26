@@ -28,6 +28,9 @@ jobs:
           test -f services/notification-service/src/server.js
           test -f docs/03-architecture/architecture-technique-microservices.md
           test -f docs/05-prototype/MIGRATION-MICROSERVICES.md
+          test -f docs/05-prototype/TESTS-EQUIPE.md
+          test -f scripts/test-microservices.sh
+          test ! -e docs/05-prototype/TESTS-MICROSERVICES.md
           jq empty infra/keycloak/collector-realm.json
           docker compose config -q
           echo "Microservices repository structure OK"
@@ -66,87 +69,9 @@ jobs:
       - name: Start full microservices stack
         run: docker compose up -d --build
 
-      - name: Wait for API Gateway
+      - name: Run shared team microservices recipe
         shell: bash
-        run: |
-          set -euo pipefail
-          for i in {1..90}; do
-            if curl -fsS http://localhost:3000/api/health | jq -e '.status == "ok"' >/dev/null; then
-              echo "API Gateway and upstream services ready"
-              exit 0
-            fi
-            sleep 2
-          done
-          docker compose ps
-          docker compose logs --tail=200
-          exit 1
-
-      - name: Validate service boundaries
-        shell: bash
-        run: |
-          set -euo pipefail
-          curl -fsS http://localhost:3001/health | jq -e '.service == "catalog-service"'
-          curl -fsS http://localhost:3002/health | jq -e '.service == "listing-service"'
-          curl -fsS http://localhost:3003/health | jq -e '.service == "notification-service"'
-          curl -fsS http://localhost:3000/api/catalog | jq -e 'length >= 3'
-
-      - name: Wait for Keycloak
-        shell: bash
-        run: |
-          set -euo pipefail
-          for i in {1..60}; do
-            if curl -fsS http://localhost:8082/realms/collector/.well-known/openid-configuration >/dev/null; then
-              echo "Keycloak ready"
-              exit 0
-            fi
-            sleep 2
-          done
-          docker compose logs keycloak
-          exit 1
-
-      - name: Validate USER authorization
-        shell: bash
-        run: |
-          set -euo pipefail
-          USER_TOKEN=$(curl -fsS -X POST             http://localhost:8082/realms/collector/protocol/openid-connect/token             -H "Content-Type: application/x-www-form-urlencoded"             -d "client_id=collector-web"             -d "grant_type=password"             -d "username=user1"             -d "password=User123!" | jq -r '.access_token')
-
-          test -n "$USER_TOKEN"
-          curl -fsS -H "Authorization: Bearer $USER_TOKEN"             http://localhost:3000/api/me | jq -e '.roles | index("USER") != null'
-
-          STATUS=$(curl -sS -o /tmp/user-admin.json -w "%{http_code}"             -H "Authorization: Bearer $USER_TOKEN"             http://localhost:3000/api/admin/stats)
-          test "$STATUS" = "403"
-
-          TITLE="CI Microservice $(date +%s)"
-          curl -fsS -X POST http://localhost:3000/api/listings             -H "Authorization: Bearer $USER_TOKEN"             -H "Content-Type: application/json"             -d "{\"title\":\"$TITLE\",\"description\":\"Created through Listing Service\",\"price\":42.50}"             | jq -e '.event == "listing.created"'
-
-          for i in {1..30}; do
-            if curl -fsS http://localhost:3000/api/catalog | jq -e --arg title "$TITLE" 'map(.title) | index($title) != null' >/dev/null; then
-              echo "Event propagated to Catalog Service"
-              break
-            fi
-            sleep 1
-            test "$i" -lt 30
-          done
-
-          for i in {1..30}; do
-            if curl -fsS http://localhost:3003/notifications/recent | jq -e --arg title "$TITLE" 'map(.title) | index($title) != null' >/dev/null; then
-              echo "Event consumed by Notification Service"
-              exit 0
-            fi
-            sleep 1
-          done
-          exit 1
-
-      - name: Validate ADMIN authorization
-        shell: bash
-        run: |
-          set -euo pipefail
-          ADMIN_TOKEN=$(curl -fsS -X POST             http://localhost:8082/realms/collector/protocol/openid-connect/token             -H "Content-Type: application/x-www-form-urlencoded"             -d "client_id=collector-web"             -d "grant_type=password"             -d "username=admin1"             -d "password=Admin123!" | jq -r '.access_token')
-
-          curl -fsS -H "Authorization: Bearer $ADMIN_TOKEN"             http://localhost:3000/api/admin/stats             | jq -e '.message == "Admin access granted"'
-
-      - name: Validate frontend
-        run: curl -fsS http://localhost:5173 | grep -q "Collector.shop"
+        run: bash scripts/test-microservices.sh
 
       - name: Cleanup
         if: always()
