@@ -5,6 +5,13 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      demo_failure:
+        description: "Déclencher volontairement un job en échec pour la démonstration"
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -29,14 +36,17 @@ jobs:
           test -f docs/03-architecture/architecture-technique-microservices.md
           test -f docs/05-prototype/MIGRATION-MICROSERVICES.md
           test -f docs/05-prototype/TESTS-EQUIPE.md
+          test -f docs/04-devops/demo-github-actions.md
           test -f scripts/test-microservices.sh
+          test -f scripts/test-performance.mjs
+          test -f tests/e2e/collector.spec.js
           test ! -e docs/05-prototype/TESTS-MICROSERVICES.md
           jq empty infra/keycloak/collector-realm.json
           docker compose config -q
           echo "Microservices repository structure OK"
 
   microservices-ci:
-    name: Unit tests and builds
+    name: Quality, unit tests and builds
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -50,7 +60,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run tests
+      - name: Lint
+        run: npm run lint
+
+      - name: Run unit tests
         run: npm test
 
       - name: Build workspaces
@@ -60,11 +73,22 @@ jobs:
         run: npm audit --audit-level=high
 
   distributed-smoke:
-    name: Distributed microservices smoke test
+    name: Distributed smoke and browser E2E
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install test dependencies
+        run: npm install
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
 
       - name: Start full microservices stack
         run: docker compose up -d --build
@@ -73,6 +97,36 @@ jobs:
         shell: bash
         run: bash scripts/test-microservices.sh
 
+      - name: Run browser E2E
+        run: npm run test:e2e
+
+      - name: Upload Playwright report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Cleanup
         if: always()
         run: docker compose down -v
+
+  intentional-failure-demo:
+    name: Intentional failure demo
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.demo_failure == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Demonstrate a blocking CI failure
+        run: npm run ci:demo-failure
