@@ -37,13 +37,18 @@ jobs:
           test -f docs/05-prototype/MIGRATION-MICROSERVICES.md
           test -f docs/05-prototype/TESTS-EQUIPE.md
           test -f docs/04-devops/demo-github-actions.md
+          test -f compose.jenkins.yaml
+          test -f infra/jenkins/Dockerfile
+          test -f infra/jenkins/jenkins.yaml
+          test -f Jenkinsfile
           test -f scripts/test-microservices.sh
           test -f scripts/test-performance.mjs
           test -f tests/e2e/collector.spec.js
           test ! -e docs/05-prototype/TESTS-MICROSERVICES.md
           jq empty infra/keycloak/collector-realm.json
           docker compose config -q
-          echo "Microservices repository structure OK"
+          docker compose -f compose.jenkins.yaml config -q
+          echo "Microservices and Jenkins repository structure OK"
 
   microservices-ci:
     name: Quality, unit tests and builds
