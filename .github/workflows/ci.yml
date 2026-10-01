@@ -37,6 +37,7 @@ jobs:
           test -f docs/05-prototype/MIGRATION-MICROSERVICES.md
           test -f docs/05-prototype/TESTS-EQUIPE.md
           test -f docs/04-devops/demo-github-actions.md
+          test -f docs/04-devops/demo-jenkins.md
           test -f compose.jenkins.yaml
           test -f infra/jenkins/Dockerfile
           test -f infra/jenkins/jenkins.yaml
@@ -49,6 +50,41 @@ jobs:
           docker compose config -q
           docker compose -f compose.jenkins.yaml config -q
           echo "Microservices and Jenkins repository structure OK"
+
+  jenkins-demo-check:
+    name: Jenkins demo instance
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build and start Jenkins
+        run: docker compose -f compose.jenkins.yaml up -d --build
+
+      - name: Wait for Jenkins
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in {1..120}; do
+            if curl -fsS http://localhost:8083/login >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose -f compose.jenkins.yaml logs --tail=200
+          exit 1
+
+      - name: Verify auto-created pipeline job
+        shell: bash
+        run: |
+          curl -fsS \
+            -u 'admin:CollectorDemo2026!' \
+            http://localhost:8083/job/collector-shop/api/json \
+            | jq -e '.name == "collector-shop"'
+
+      - name: Cleanup Jenkins
+        if: always()
+        run: docker compose -f compose.jenkins.yaml down -v
 
   microservices-ci:
     name: Quality, unit tests and builds
