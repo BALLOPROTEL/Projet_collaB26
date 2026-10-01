@@ -1,6 +1,6 @@
 {
   "name": "collector-shop-microservices",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "workspaces": [
     "apps/web",
@@ -12,8 +12,16 @@
     "dev:catalog": "npm --workspace @collector/catalog-service run dev",
     "dev:listing": "npm --workspace @collector/listing-service run dev",
     "dev:notification": "npm --workspace @collector/notification-service run dev",
+    "lint": "eslint .",
     "test": "npm --workspaces --if-present run test",
+    "test:e2e": "playwright test",
+    "test:perf": "node scripts/test-performance.mjs",
+    "ci:demo-failure": "node scripts/ci-demo-failure.mjs",
     "build": "npm --workspaces --if-present run build"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.0",
+    "eslint": "^9.0.0"
   },
   "engines": {
     "node": ">=20"
