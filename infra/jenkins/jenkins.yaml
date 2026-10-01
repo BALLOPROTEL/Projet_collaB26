@@ -1,0 +1,39 @@
+jenkins:
+  systemMessage: "Collector.shop — Jenkins de démonstration CI/CD"
+  numExecutors: 1
+
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID}"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+unclassified:
+  location:
+    url: "http://localhost:8083/"
+
+jobs:
+  - script: >
+      pipelineJob('collector-shop') {
+        description('Pipeline Jenkins de démonstration pour Collector.shop')
+        quietPeriod(0)
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('https://github.com/BALLOPROTEL/Projet_collaB26.git')
+                }
+                branch('*/main')
+              }
+            }
+            scriptPath('Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }

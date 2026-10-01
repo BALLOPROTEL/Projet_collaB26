@@ -1,6 +1,29 @@
 pipeline {
   agent any
 
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+  }
+
+  parameters {
+    booleanParam(
+      name: 'DEMO_FAILURE',
+      defaultValue: false,
+      description: 'Déclencher volontairement un échec pour la démonstration'
+    )
+  }
+
+  environment {
+    COMPOSE_PROJECT_NAME = 'collector-jenkins-app'
+    API_URL = 'http://api-gateway:3000'
+    CATALOG_URL = 'http://catalog-service:3001'
+    LISTING_URL = 'http://listing-service:3002'
+    NOTIFICATION_URL = 'http://notification-service:3003'
+    KEYCLOAK_URL = 'http://keycloak:8080'
+    FRONTEND_URL = 'http://web'
+  }
+
   stages {
     stage('Checkout') {
       steps {
@@ -13,38 +36,96 @@ pipeline {
         sh '''
           set -eu
           test -f README.md
-          test -f docs/01-product-owner/cadrage-collector-shop.md
-          test -f docs/02-lead-dev/qualite-logicielle.md
-          test -f docs/03-architecture/architecture-macroscopique.md
-          test -f docs/04-devops/pipeline-cible.md
+          test -f package.json
+          test -f compose.yaml
+          test -f scripts/test-microservices.sh
+          test -f docs/05-prototype/TESTS-EQUIPE.md
+          docker compose config -q
           echo "Repository structure OK"
         '''
       }
     }
 
-    stage('Application CI placeholder') {
+    stage('Install dependencies') {
+      steps {
+        sh 'npm install --no-package-lock'
+      }
+    }
+
+    stage('Lint') {
+      steps {
+        sh 'npm run lint'
+      }
+    }
+
+    stage('Unit tests') {
+      steps {
+        sh 'npm test'
+      }
+    }
+
+    stage('Build workspaces') {
+      steps {
+        sh 'npm run build'
+      }
+    }
+
+    stage('Dependency security audit') {
+      steps {
+        sh 'npm audit --audit-level=high'
+      }
+    }
+
+    stage('Build container images') {
+      steps {
+        sh 'docker compose build'
+      }
+    }
+
+    stage('Distributed integration') {
+      steps {
+        sh '''
+          set -eu
+
+          docker compose down --remove-orphans -v || true
+          docker compose up -d
+
+          for i in $(seq 1 90); do
+            if docker inspect -f '{{.State.Health.Status}}' collector-api-gateway 2>/dev/null | grep -q healthy; then
+              break
+            fi
+            sleep 2
+          done
+
+          docker network connect collector-jenkins-app_default collector-jenkins 2>/dev/null || true
+
+          bash scripts/test-microservices.sh
+        '''
+      }
+    }
+
+    stage('Intentional failure demo') {
       when {
-        anyOf {
-          expression { fileExists('package.json') }
-          expression { fileExists('pom.xml') }
-          expression { fileExists('build.gradle') }
-          expression { fileExists('requirements.txt') }
-          expression { fileExists('pyproject.toml') }
-        }
+        expression { return params.DEMO_FAILURE }
       }
       steps {
-        echo 'Application detected.'
-        echo 'Replace this placeholder with install, lint, tests, security scans and build during prototype implementation.'
+        sh 'npm run ci:demo-failure'
       }
     }
   }
 
   post {
+    always {
+      sh '''
+        docker network disconnect collector-jenkins-app_default collector-jenkins 2>/dev/null || true
+        docker compose down --remove-orphans -v || true
+      '''
+    }
     success {
-      echo 'Collector.shop pipeline succeeded.'
+      echo 'Collector.shop Jenkins pipeline succeeded.'
     }
     failure {
-      echo 'Collector.shop pipeline failed.'
+      echo 'Collector.shop Jenkins pipeline failed as expected when a blocking control fails.'
     }
   }
 }
