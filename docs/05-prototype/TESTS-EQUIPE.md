@@ -410,15 +410,63 @@ Puis :
 
 ## 12. Tests techniques supplémentaires
 
-Chaque membre peut également lancer :
+### Qualité, tests unitaires et build
 
 ```bash
+npm run lint
 npm test
 npm run build
 npm audit --audit-level=high
 ```
 
 Résultat attendu : toutes les commandes passent.
+
+### Test E2E navigateur avec Playwright
+
+Le navigateur de test doit être installé une première fois :
+
+```bash
+npx playwright install chromium
+```
+
+Avec la stack Docker déjà démarrée :
+
+```bash
+npm run test:e2e
+```
+
+Le scénario E2E vérifie :
+- catalogue public ;
+- authentification Keycloak USER ;
+- création d'une annonce depuis l'interface ;
+- propagation RabbitMQ jusqu'au catalogue ;
+- authentification ADMIN ;
+- accès à l'administration.
+
+### Test de performance simple
+
+Avec la stack démarrée :
+
+```bash
+npm run test:perf
+```
+
+Valeurs par défaut :
+- 300 requêtes ;
+- concurrence 20 ;
+- p95 attendu <= 1000 ms ;
+- débit minimum attendu >= 5 requêtes/s.
+
+Les seuils peuvent être ajustés sans modifier le code :
+
+```bash
+PERF_REQUESTS=500 \
+PERF_CONCURRENCY=25 \
+PERF_P95_MS=1200 \
+npm run test:perf
+```
+
+Ce test de performance reste volontairement séparé du pipeline CI principal pour éviter les résultats instables liés aux performances variables des runners.
 
 ---
 
@@ -524,8 +572,11 @@ Notification Service : PASS / FAIL
 Connexion ADMIN : PASS / FAIL
 ADMIN -> admin = 200 : PASS / FAIL
 scripts/test-microservices.sh : PASS / FAIL
+npm run lint : PASS / FAIL
 npm test : PASS / FAIL
 npm run build : PASS / FAIL
+npm run test:e2e : PASS / FAIL
+npm run test:perf : PASS / FAIL
 
 Problèmes observés :
 - ...
@@ -609,10 +660,11 @@ La seconde commande supprime aussi les bases et les données RabbitMQ locales du
 
 Après validation collective de cette recette :
 
-1. finaliser GitHub Actions (#11) ;
+1. finaliser les derniers contrôles sécurité dans GitHub Actions (#11 / #5) ;
 2. réaliser la démonstration Jenkins (#12) ;
-3. ajouter E2E navigateur et performance (#13) ;
+3. exécuter et conserver les résultats E2E / performance (#13) ;
 4. déployer l'architecture microservices sur Kubernetes / Kind (#14) ;
 5. finaliser politique et scans sécurité (#5) ;
 6. finaliser Keycloak vs Auth0 ;
-7. préparer PPT, démonstrations et répétition (#6).
+7. réaliser la finition UX/UI du site (#30) ;
+8. préparer PPT, démonstrations et répétition (#6).
