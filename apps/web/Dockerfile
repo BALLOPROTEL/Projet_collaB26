@@ -8,6 +8,12 @@ RUN npm config set fetch-retries 6 \
 COPY apps/web/package.json ./package.json
 RUN npm install --no-audit --no-fund
 COPY apps/web ./
+
+ARG VITE_API_URL=http://localhost:3000/api
+ARG VITE_KEYCLOAK_URL=http://localhost:8082
+ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_KEYCLOAK_URL=${VITE_KEYCLOAK_URL}
+
 RUN npm run build
 
 FROM nginx:alpine
