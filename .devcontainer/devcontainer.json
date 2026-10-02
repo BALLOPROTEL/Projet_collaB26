@@ -1,0 +1,28 @@
+{
+  "name": "Collector.shop Cloud Dev",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "forwardPorts": [5173, 3000, 8082, 15674],
+  "portsAttributes": {
+    "5173": {
+      "label": "Collector Web",
+      "onAutoForward": "openBrowser"
+    },
+    "3000": {
+      "label": "API Gateway",
+      "onAutoForward": "silent"
+    },
+    "8082": {
+      "label": "Keycloak",
+      "onAutoForward": "silent"
+    },
+    "15674": {
+      "label": "RabbitMQ Management",
+      "onAutoForward": "silent"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "postStartCommand": "bash .devcontainer/post-start.sh"
+}
