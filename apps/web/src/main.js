@@ -1,10 +1,11 @@
 import Keycloak from "keycloak-js";
 import "./style.css";
 
-const API_URL = "http://localhost:3000/api";
+const API_URL =
+  import.meta.env.VITE_API_URL ?? "http://localhost:3000/api";
 
 const keycloak = new Keycloak({
-  url: "http://localhost:8082",
+  url: import.meta.env.VITE_KEYCLOAK_URL ?? "http://localhost:8082",
   realm: "collector",
   clientId: "collector-web"
 });
