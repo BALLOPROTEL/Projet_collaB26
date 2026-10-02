@@ -17,7 +17,11 @@
     "test:e2e": "playwright test",
     "test:perf": "node scripts/test-performance.mjs",
     "ci:demo-failure": "node scripts/ci-demo-failure.mjs",
-    "build": "npm --workspaces --if-present run build"
+    "build": "npm --workspaces --if-present run build",
+    "codespaces:up": "bash scripts/codespaces-up.sh",
+    "codespaces:check": "bash scripts/codespaces-check.sh",
+    "codespaces:down": "bash scripts/codespaces-down.sh",
+    "codespaces:rebuild": "bash scripts/codespaces-rebuild.sh"
   },
   "devDependencies": {
     "@playwright/test": "^1.50.0",
